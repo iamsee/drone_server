@@ -1,0 +1,51 @@
+FROM php:7.3-fpm
+
+LABEL maintainer="iamsee <root@iamsee.com>"
+
+RUN echo "deb http://mirrors.aliyun.com/debian/ stretch main non-free contrib" > /etc/apt/sources.list && \
+    echo "deb-src http://mirrors.aliyun.com/debian/ stretch main non-free contrib" >> /etc/apt/sources.list  && \
+    echo "deb http://mirrors.aliyun.com/debian-security stretch/updates main" >> /etc/apt/sources.list && \
+    echo "deb-src http://mirrors.aliyun.com/debian-security stretch/updates main" >> /etc/apt/sources.list && \
+    echo "deb http://mirrors.aliyun.com/debian/ stretch-updates main non-free contrib" >> /etc/apt/sources.list && \
+    echo "deb-src http://mirrors.aliyun.com/debian/ stretch-updates main non-free contrib" >> /etc/apt/sources.list && \
+    echo "deb http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib" >> /etc/apt/sources.list && \
+    echo "deb-src http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib" >> /etc/apt/sources.list && \
+    apt-get update && apt-get upgrade -y \
+    g++ \
+    libzip \
+    libzip-dev \
+    libc-client-dev \
+    libfreetype6-dev \
+    libicu-dev \
+    libjpeg62-turbo-dev \
+    libkrb5-dev \
+    libpq-dev \
+    libmagickwand-dev \
+    libmcrypt-dev \
+    libpng-dev \
+    libmemcached-dev \
+    libssl-dev \
+    libssl-doc \
+    libsasl2-dev \
+    zlib1g-dev \
+    && docker-php-ext-install \
+    bz2 \
+    iconv \
+    mbstring \
+    mysqli \
+    pgsql \
+    pdo_mysql \
+    pdo_pgsql \
+    soap \
+    zip \
+    && docker-php-ext-configure gd \
+    --with-freetype-dir=/usr/include/ \
+    --with-jpeg-dir=/usr/include/ \
+    --with-png-dir=/usr/include/ \
+    && docker-php-ext-install gd \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install intl \
+    && apt-get autoremove -y --purge \
+    && apt-get clean \
+    && rm -Rf /tmp/* \
+    && \cp -f /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini

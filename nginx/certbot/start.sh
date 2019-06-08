@@ -1,0 +1,1 @@
+./letsencrypt-auto certonly --webroot -m root@iamsee.com -w ../../www -d bytelurk.com -d wechat.bytelurk.com -d api.bytelurk.com -d www.bytelurk.com -d git.bytelurk.com -d proxy.bytelurk.com -d jenkins.bytelurk.com
