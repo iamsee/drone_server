@@ -121,4 +121,19 @@ services:
         - 3100:3100
       command: bash -c "npm start > server.log"
       container_name: v-ai_image
+  frp:
+        image: cloverzrg/frps-docker
+        restart: always
+        container_name: v-frp
+        ports:
+                - 7000:7000
+                - 7001:7001
+                - 7080:80
+                - 7443:443
+                - 7500:7500
+                - 7022:7022
+                - 7300-7400:7300-7400
+                
+        volumes:
+                - $PWD/frp/conf:/conf
 
