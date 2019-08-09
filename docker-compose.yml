@@ -17,13 +17,13 @@ services:
       links:
         - drone-server:drone-server
         - v2ray:v2ray
-        - owncloud:owncloud
+ #       - owncloud:owncloud
        # - filebrowser:filebrowser
       depends_on:
         - drone-server
         - v2ray
-        - owncloud
-        - filebrowser
+  #      - owncloud
+        #- filebrowser
   php:
       image: iamsee/php-fpm:7.2
       ports:
@@ -95,20 +95,20 @@ services:
         - $PWD/v2ray/config.json:/config.json
         - $PWD/v2ray/entrypoint.sh:/entrypoint.sh
       #  - $PWD/v2ray/entrypoint.sh /entrypoint.sh
-  owncloud:
-      container_name: v-owncloud
-      image: owncloud
-      ports:
-        - 9081:80
-      volumes:
-        - $PWD/www/owncloud:/var/www/html     
-  filebrowser:
-      container_name: v-filebrowser
-      image: filebrowser/filebrowser
-      ports:
-        - 9100:80
-      volumes:
-        - /googleDriver:/srv
+  #owncloud:
+  #    container_name: v-owncloud
+  #    image: owncloud
+  #    ports:
+  #      - 9081:80
+  #    volumes:
+  #      - $PWD/www/owncloud:/var/www/html     
+  #filebrowser:
+  #    container_name: v-filebrowser
+  #    image: filebrowser/filebrowser
+  #    ports:
+  #      - 9100:80
+  #    volumes:
+  #      - /googleDriver:/srv
   ai_image:
       image: node:10
       working_dir: "/var/www/mobile-site"
