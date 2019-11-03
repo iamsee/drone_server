@@ -3,18 +3,23 @@ services:
   drone-server:
     container_name: v-drone-server
     image: drone/drone:latest
+    networks: 
+      - dronenet        # 让drone-server和drone-agent处于一个网络中，方便进行RPC通信
     ports:
       - 4000:80
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - $PWD/drone:/var/lib/drone/
     restart: always
-    command: apk add --no-cache tzdata
+    #command: apk add --no-cache tzdata && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo "Asia/Shanghai" > /etc/timezone
+    #command: 123 > /tmp/1.txt
     environment:
+      - DRONE_AGENTS_ENABLED=true
       - DRONE_OPEN=true
-      - DRONE_SERVER_HOST=drone.iamsee.com:2544
+      - DRONE_SERVER_HOST=gcp.iamsee.com:4000
       - DRONE_DEBUG=true
       - DRONE_GIT_ALWAYS_AUTH=false
+      - DRONE_RPC_SECRET=admin
       #- DRONE_GOGS=true
       #- DRONE_GOGS_SKIP_VERIFY=false
       #- DRONE_GOGS_SERVER=http://gogs:3000
@@ -26,27 +31,36 @@ services:
       # - DRONE_GITHUB_CLIENT_ID=462e5673d9814da03e103601c7723750f32c636926977410a3a57c9dc457c24a
       # - DRONE_GITHUB_CLIENT_SECRET=547f783e13125fb2a4a27324047735e14a8a9cca11ab8a9cb54ef885d370bfb2
       - DRONE_SERVER_PROTO=http
+      - DRONE_LOGS_DEBUG=true
+      - DRONE_LOGS_TRACE=true
+      - DRONE_LOGS_COLOR=true
+      - DRONE_LOGS_PRETTY=true
+      - DRONE_LOGS_TEXT=true
       - DRONE_USER_CREATE=username:alic,admin:true
       - DRONE_DATABASE_DATASOURCE=/var/lib/drone/drone.sqlite
       - DRONE_DATABASE_DRIVER=sqlite3
       #- DRONE_DATABASE_DATASOURCE=root:zhuotong@tcp(bytelurk.com:3306)/drone?parseTime=true
       #- DRONE_DATABASE_DRIVER=mysql
       - TZ=Asia/Shanghai
-  frp:
-        image: cloverzrg/frps-docker
-        restart: always
-        container_name: v-frp
-        ports:
-                - 7000:7000
-                - 7001:7001
-                - 7080:80
-                - 7443:443
-                - 7500:7500
-                - 7022:7022
-                - 7300-7400:7300-7400
-                - 3001:3001 #监听端口
-                - 81:81  # nas外网端口 
-
-        volumes:
-                - $PWD/frp/conf:/conf
-
+    command: >
+      sh -c "ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone"
+  drone-agent:
+    image: drone/agent:latest
+    container_name: v-drone-agent
+    networks: 
+      - dronenet     # 让drone-server和drone-agent处于一个网络中，方便进行RPC通信
+    depends_on:
+      - drone-server 
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # docker.sock [1]
+    environment:
+      - DRONE_RPC_SERVER=http://drone-server  # RPC服务地址
+      - DRONE_RPC_SECRET=admin  # RPC秘钥
+      - DRONE_RUNNER_CAPACITY=2               # 最大并发执行的 pipeline 数
+      - DRONE_DEBUG=true                      # 调试相关，部署的时候建议先打开
+      - DRONE_LOGS_DEBUG=true                 # 调试相关，部署的时候建议先打开
+      - DRONE_LOGS_TRACE=true                 # 调试相关，部署的时候建议先打开
+      - TZ=Asia/Shanghai
+    restart: always
+networks:
+   dronenet:
